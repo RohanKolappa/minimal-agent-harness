@@ -1,8 +1,8 @@
 #the main engine
 #assembles the system prompt and starts looping
 #on every iteration, the context will be compacted if it grows too large
-#everythign mentioned above + the tool calls + calling subagents will all be implemented in this while loop
-#we also will cap how iterations that can take place in this loop so that it never runs forever
+#everything mentioned above + the tool calls + calling subagents will all be implemented in this while loop
+#we also will cap how many iterations that can take place in this loop so that it never runs forever
 
 #every other component exists to support this loop
 
