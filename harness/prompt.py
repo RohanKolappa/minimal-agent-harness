@@ -13,7 +13,7 @@ def assemble_system_prompt(
     parts: list[str] = [STATIC_SCAFFOLD]
     total_dynamic = 0
     for directory in _walk_ancestors(Path(cwd)):
-        for fname in INSTRUCTIONS_FILES:
+        for fname in INSTRUCTION_FILES:
             f = directory / fname
             if not f.exists():
                 continue
