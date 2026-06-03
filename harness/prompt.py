@@ -4,6 +4,21 @@
     #otherwise you will break the prefix caching
 
 from pathlib import Path
+from typing import Generator
+
+STATIC_SCAFFOLD = """\
+You are a helpful coding agent. Follow instructions carefully, use available tools, and be concise.
+"""
+
+INSTRUCTION_FILES = ["AGENTS.md", "CLAUDE.md", ".cursorrules"]
+
+def _walk_ancestors(path: Path) -> Generator[Path, None, None]:
+    current = path if path.is_dir() else path.parent
+    while True:
+        yield current
+        if current.parent == current:  # filesystem root
+            break
+        current = current.parent
 
 def assemble_system_prompt( 
     cwd: Path | str,
