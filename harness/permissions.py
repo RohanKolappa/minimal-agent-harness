@@ -7,7 +7,7 @@
     #anything else is workspace level
 #on top of these static rules, the agent can also pause and ask the user for explicit approval before running anything destructive
 
-
+import shlex
 
 class Permission:
     READ_ONLY = "read"
