@@ -29,5 +29,5 @@ class ToolRegistry:
         return self._tools[name] #if it's missing it returns KeyError rather than returning None (which would be the case if we used .get(name))
     
     def descriptors(self):
-        return [{"name": t.name, "permission": t.permission, "handler": t.handler, "description": t.description} for t in self._tools.values()]
-    
+        #only the lightweight, serializable fields go to the model - never the handler function
+        return [{"name": t.name, "permission": t.permissions, "description": t.description} for t in self._tools.values()]

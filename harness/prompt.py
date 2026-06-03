@@ -25,7 +25,13 @@ def assemble_system_prompt(
     max_per_file: int = 4000,
     max_total: int = 12000,
 ) -> str:
-    parts: list[str] = [STATIC_SCAFFOLD]
+    cwd_path = Path(cwd)
+    parts: list[str] = [
+        STATIC_SCAFFOLD,
+        f"Your current working directory is: {cwd_path}\n"
+        f"When a tool needs a path, use paths relative to this directory (or absolute paths under it). "
+        f"Do not invent paths like /home/user/...",
+    ]
     total_dynamic = 0
     for directory in _walk_ancestors(Path(cwd)):
         for fname in INSTRUCTION_FILES:
