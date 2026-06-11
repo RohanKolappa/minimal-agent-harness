@@ -5,3 +5,17 @@ __pycache__/
 .DS_Store
 .env
 demo/.session.jsonl
+
+# Python venv for the web UI backend
+.venv/
+
+# Web UI runtime dirs (gitignored sandbox + per-run session logs)
+.agent-workspace/
+.agent-data/
+
+# Frontend
+web/node_modules/
+web/dist/
+web/*.tsbuildinfo
+web/coverage/
+web/.vitest/
