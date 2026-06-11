@@ -17,6 +17,8 @@ It covers the nine building blocks of a coding harness. Most are fully wired int
 8. **lifecycle hooks** — *working*
 9. **permissions & safety** — *working*
 
+It also ships a full local **Web UI** — an agent workspace with live tool blocks, human-in-the-loop approvals, guided setup/onboarding, and a README-grounded help assistant ([Quick start → Option B — Web UI](#3-run-it)).
+
 ---
 
 ## Quick start
@@ -44,15 +46,29 @@ ollama pull qwen2.5-coder:7b      # ~4.7GB, recommended — strong at tool/JSON 
 # ollama pull llama3.1:8b         # works too, but sloppier with structured output
 ```
 
-### 3. Run the agent
+### 3. Run it
 
-From the repo root:
+Two ways to drive the same harness — pick one.
+
+**Option A — CLI demo** (quickest look at the loop). From the repo root:
 
 ```bash
 OLLAMA_MODEL=qwen2.5-coder:7b python demo/run_demo.py "Create a file note.txt containing 'hi', then confirm what you did."
 ```
 
-`OLLAMA_MODEL` defaults to `llama3.1:8b` if unset. The demo sandboxes its tools to the **repo root**, so file paths must stay inside it — an absolute path like `/tmp/note.txt` is refused on purpose (see Permissions & safety). (The Web UI below uses a separate, dedicated sandbox directory instead.)
+`OLLAMA_MODEL` defaults to `llama3.1:8b` if unset. The demo sandboxes its tools to the **repo root**, so file paths must stay inside it — an absolute path like `/tmp/note.txt` is refused on purpose (see Permissions & safety). (The Web UI uses a separate, dedicated sandbox directory instead.)
+
+**Option B — Web UI** (visual & interactive — workspace, approvals, help assistant). One command builds the frontend and serves it from the backend:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r server/requirements.txt
+( cd web && npm install && npm run build )      # builds web/dist
+uvicorn server.app:app --host 127.0.0.1 --port 8765
+# open http://127.0.0.1:8765
+```
+
+FastAPI serves the built UI at `/` and the API under `/api` — one origin, no CORS. See the [Web UI](#web-ui) section below for development (hot-reload), offline use, and architecture.
 
 ### 4. Run with no LLM at all
 
@@ -78,17 +94,7 @@ The UI never modifies the harness's behavior or its safety model. The only harne
 additive, opt-in `Agent(on_event=...)` callback used to stream a live view; with `on_event=None`
 the engine and its persisted log are byte-for-byte unchanged.
 
-### One-command (production): built frontend served by the backend
-
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r server/requirements.txt
-( cd web && npm install && npm run build )      # builds web/dist
-uvicorn server.app:app --host 127.0.0.1 --port 8765
-# open http://127.0.0.1:8765
-```
-
-FastAPI serves the built assets at `/` and the API under `/api` — one origin, no CORS.
+For the one-command production setup (build + serve), see **Option B — Web UI** in [Quick start](#3-run-it) above.
 
 ### Development (hot-reload frontend)
 
