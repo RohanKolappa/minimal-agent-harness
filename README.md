@@ -46,12 +46,13 @@ ollama pull qwen2.5-coder:7b      # ~4.7GB, recommended — strong at tool/JSON 
 
 ### 3. Run the agent
 
+From the repo root:
+
 ```bash
-cd build
 OLLAMA_MODEL=qwen2.5-coder:7b python demo/run_demo.py "Create a file note.txt containing 'hi', then confirm what you did."
 ```
 
-`OLLAMA_MODEL` defaults to `llama3.1:8b` if unset. Note that file paths must stay **inside the `build/` workspace** — the demo's tools are sandboxed, so an absolute path like `/tmp/note.txt` is refused on purpose (see Permissions & safety).
+`OLLAMA_MODEL` defaults to `llama3.1:8b` if unset. The demo sandboxes its tools to the **repo root**, so file paths must stay inside it — an absolute path like `/tmp/note.txt` is refused on purpose (see Permissions & safety). (The Web UI below uses a separate, dedicated sandbox directory instead.)
 
 ### 4. Run with no LLM at all
 
@@ -60,6 +61,54 @@ A scripted `StubModel` drives the full loop offline, so you can see the mechanic
 ```bash
 python demo/run_demo.py --offline "anything"
 python tests/test_harness.py          # 13 tests; or: python -m pytest tests/ -q
+```
+
+---
+
+## Web UI
+
+A local web UI (`server/` FastAPI backend + `web/` React frontend) wraps the harness with three
+things: an **Agent workspace** (give a plain-English task and watch it run step by step, with
+truthful permission badges and human-in-the-loop approval), **Setup & onboarding** (detects
+Ollama's state and walks you to a working setup, with an instant offline path), and a **Help
+assistant** (a chat answered by your local model, grounded in this README). It binds to
+`127.0.0.1` only — it drives a shell-capable agent, so never expose it to a network.
+
+The UI never modifies the harness's behavior or its safety model. The only harness change is an
+additive, opt-in `Agent(on_event=...)` callback used to stream a live view; with `on_event=None`
+the engine and its persisted log are byte-for-byte unchanged.
+
+### One-command (production): built frontend served by the backend
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r server/requirements.txt
+( cd web && npm install && npm run build )      # builds web/dist
+uvicorn server.app:app --host 127.0.0.1 --port 8765
+# open http://127.0.0.1:8765
+```
+
+FastAPI serves the built assets at `/` and the API under `/api` — one origin, no CORS.
+
+### Development (hot-reload frontend)
+
+```bash
+# terminal 1 — backend
+uvicorn server.app:app --host 127.0.0.1 --port 8765 --reload
+# terminal 2 — frontend (Vite proxies /api to the backend; CORS is locked to this origin)
+cd web && npm run dev        # http://127.0.0.1:5173
+```
+
+### Offline
+
+No Ollama? Tick **Offline (scripted demo)** in the Agent tab (or use the Setup tab's *Skip — try
+offline* button). The entire UI is usable with a scripted `StubModel`, including the approval card.
+
+The agent's sandbox defaults to a dedicated, gitignored `.agent-workspace/` directory (seeded with
+a `welcome.txt`), and per-run session logs are written under `.agent-data/sessions/`.
+
+```bash
+.venv/bin/python server/tests/test_server.py    # backend tests (offline; no Ollama needed)
 ```
 
 ---
@@ -179,7 +228,7 @@ A skill would just be a normal registered tool whose handler reads a markdown fi
 ## Layout
 
 ```
-build/
+minimal-agent-harness/   (repo root — these dirs sit at the top level; there is no build/ wrapper)
   harness/        the package
     loop.py         Agent engine
     model.py        OllamaModel + StubModel
@@ -195,6 +244,16 @@ build/
     run_demo.py     runnable entry point (live + --offline)
   tests/
     test_harness.py 13 tests, no LLM required
+    test_on_event.py  tests the additive Agent.on_event hook
+  server/           FastAPI backend for the Web UI (not part of the core)
+    app.py            routes, CORS, static serving, help assistant
+    runner.py         per-run queue / SSE transport / cancel
+    approvals.py      approval registry + pre-hook + policy
+    ollama_client.py  health probe + assistant streaming
+    sessions.py       per-run session files + replay
+    config.py         shared host / default model / sandbox dirs
+    schemas.py        Pydantic request & response models
+  web/              React + TypeScript + Tailwind frontend
 ```
 
 ## Notes & limitations

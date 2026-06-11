@@ -1,0 +1,5 @@
+# Backend-only dependencies. The `harness/` core stays pure-stdlib; these live exclusively here.
+fastapi>=0.110
+uvicorn[standard]>=0.27
+httpx>=0.27
+pydantic>=2.6

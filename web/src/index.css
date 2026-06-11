@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------------
+   Design tokens. One accent, a refined neutral scale, semantic state colors.
+   Dark is the default; [data-theme="light"] overrides. Tailwind v4 maps these
+   CSS variables into utilities via @theme inline (bg-bg, text-fg, border-line…).
+---------------------------------------------------------------------------- */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius: 0.625rem;
+}
+
+:root {
+  --bg: #09090b;
+  --surface: #101013;
+  --surface-2: #16161a;
+  --line: #232329;
+  --fg: #ededf0;
+  --muted: #9b9ba6;
+  --faint: #6a6a76;
+  --accent: #7c7bff;
+  --accent-fg: #ffffff;
+  --accent-soft: rgba(124, 123, 255, 0.14);
+  --success: #46c66b;
+  --danger: #f8615a;
+  --warn: #e0a23a;
+}
+
+[data-theme="light"] {
+  --bg: #fbfbfc;
+  --surface: #ffffff;
+  --surface-2: #f5f5f7;
+  --line: #e6e6ea;
+  --fg: #1a1a1f;
+  --muted: #62626c;
+  --faint: #9a9aa4;
+  --accent: #5b5af0;
+  --accent-fg: #ffffff;
+  --accent-soft: rgba(91, 90, 240, 0.10);
+  --success: #1f9d4d;
+  --danger: #d83a33;
+  --warn: #b87514;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv05", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* refined, unobtrusive scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--faint);
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* visible keyboard focus for all interactive elements (mouse clicks stay ring-free) */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-in {
+  animation: fade-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.pulse-soft {
+  animation: pulse-soft 1.4s ease-in-out infinite;
+}
+
+@keyframes blink-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.caret::after {
+  content: "▍";
+  margin-left: 1px;
+  animation: blink-caret 1s step-end infinite;
+  color: var(--accent);
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+/* code surfaces use the mono stack everywhere */
+pre,
+code,
+kbd {
+  font-family: var(--font-mono);
+}
